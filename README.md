@@ -1,4 +1,4 @@
-# DocIntel (rag-ultimate)
+# Context-Vault (rag-ultimate)
 
 Local document intelligence: upload PDF/DOCX/XLSX/CSV/TXT, ask questions, get cited answers. RAG with FastAPI + PostgreSQL + Qdrant + OpenRouter.
 

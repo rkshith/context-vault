@@ -20,7 +20,7 @@ export default function Layout() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-6">
-            <span className="text-base font-semibold tracking-tight">DocIntel</span>
+            <span className="text-base font-semibold tracking-tight">Context-Vault</span>
             <nav className="flex items-center gap-1">
               <NavLink to="/" end className={navLinkClass}>
                 Chat

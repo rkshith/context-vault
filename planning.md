@@ -1,4 +1,4 @@
-# DocIntel (rag-ultimate) — Planning & Architecture
+# Context-Vault (rag-ultimate) — Planning & Architecture
 
 Local, production-oriented document intelligence system.
 Stack: React (Vite) + FastAPI + PostgreSQL + Qdrant + OpenRouter. Auth: email/password now, Google OAuth optional.
