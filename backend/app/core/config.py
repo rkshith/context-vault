@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,15 +15,19 @@ class Settings(BaseSettings):
     app_name: str = "rag-ultimate"
     environment: str = "local"
 
-    # PostgreSQL
+    # PostgreSQL (local parts) — ignored when DATABASE_URL is set (cloud).
     postgres_user: str = "rag"
     postgres_password: str = ""
     postgres_db: str = "rag"
     postgres_host: str = "postgres"
     postgres_port: int = 5432
+    # Full URI override for managed Postgres (Supabase). Example:
+    # postgresql://postgres.xxx:PASSWORD@host:5432/postgres?sslmode=require
+    database_url_override: str = Field(default="", validation_alias="DATABASE_URL")
 
     # Qdrant
     qdrant_url: str = "http://qdrant:6333"
+    qdrant_api_key: str = ""
     qdrant_collection: str = "chunks"
 
     # Security
@@ -58,10 +63,25 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
+        if self.database_url_override:
+            url = self.database_url_override.replace("postgresql://", "postgresql+asyncpg://")
+            url = url.replace("?sslmode=require", "").replace("&sslmode=require", "")
+            return url
         return (
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
+
+    @property
+    def db_connect_args(self) -> dict:
+        """SSL for managed DBs; no prepared statements on Supabase pooler (6543)."""
+        args: dict = {}
+        override = self.database_url_override
+        if "sslmode=require" in override or "supabase" in override:
+            args["ssl"] = "require"
+        if ":6543" in override:
+            args["statement_cache_size"] = 0
+        return args
 
     @property
     def cors_origin_list(self) -> list[str]:
