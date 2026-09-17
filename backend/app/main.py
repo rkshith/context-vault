@@ -43,3 +43,9 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(documents.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
 app.include_router(conversations.router, prefix="/api")
+
+
+@app.get("/", tags=["health"])
+async def root() -> dict:
+    """Landing endpoint so the base URL identifies the service instead of 404ing."""
+    return {"service": settings.app_name, "docs": "/docs", "health": "/api/health"}
