@@ -20,8 +20,8 @@ data/
 backend/storage/
 *.sqlite3
 
-# Model caches
-models/
+# Model caches (root-anchored: must NOT match backend/app/models/)
+/models/
 
 # IDE / OS
 .vscode/
