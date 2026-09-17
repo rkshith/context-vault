@@ -1,34 +1,6 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  qdrant:
-    image: qdrant/qdrant:latest
-    restart: unless-stopped
-    ports:
-      - "6333:6333"
-    volumes:
-      - qdrantdata:/qdrant/storage
-    healthcheck:
-      test: ["CMD-SHELL", "bash -c ':< /dev/tcp/127.0.0.1/6333' || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
+  # Local postgres/qdrant removed: production data lives in Supabase + Qdrant Cloud.
+  # Volumes below are kept so local data is still available as rollback.
   backend:
     build: ./backend
     restart: unless-stopped
@@ -42,11 +14,7 @@ services:
       - filedata:/app/storage
       # fastembed model cache
       - modelcache:/app/models
-    depends_on:
-      postgres:
-        condition: service_healthy
-      qdrant:
-        condition: service_healthy
+    depends_on: []
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:

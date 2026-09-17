@@ -1,7 +1,18 @@
 from functools import lru_cache
+from urllib.parse import quote, unquote
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _encode_password(url: str) -> str:
+    """Percent-encode the password so special chars ([ ] @ : # / ?) can't break parsing."""
+    scheme, _, rest = url.partition("://")
+    userinfo, at, hostinfo = rest.rpartition("@")
+    if not at or ":" not in userinfo:
+        return url
+    user, _, password = userinfo.partition(":")
+    return f"{scheme}://{user}:{quote(unquote(password), safe='')}@{hostinfo}"
 
 
 class Settings(BaseSettings):
@@ -58,6 +69,11 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     frontend_origin: str = "http://localhost:5173"
 
+    # Auth cookie. Cross-site frontend (Vercel) + backend (Render) requires
+    # COOKIE_SAMESITE=none (browsers then also require Secure).
+    cookie_samesite: str = "lax"
+    cookie_secure: bool | None = None
+
     # Google OAuth (optional)
     google_client_id: str = ""
 
@@ -66,7 +82,7 @@ class Settings(BaseSettings):
         if self.database_url_override:
             url = self.database_url_override.replace("postgresql://", "postgresql+asyncpg://")
             url = url.replace("?sslmode=require", "").replace("&sslmode=require", "")
-            return url
+            return _encode_password(url)
         return (
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"

@@ -49,8 +49,10 @@ def set_auth_cookie(response, token: str) -> None:
         key=ACCESS_TOKEN_COOKIE,
         value=token,
         httponly=True,
-        samesite="lax",
-        secure=settings.environment == "production",
+        samesite=settings.cookie_samesite,
+        secure=settings.cookie_secure
+        if settings.cookie_secure is not None
+        else (settings.environment == "production" or settings.cookie_samesite == "none"),
         max_age=settings.jwt_expire_minutes * 60,
         path="/",
     )

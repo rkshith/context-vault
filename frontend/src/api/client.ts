@@ -15,6 +15,11 @@ export function errorMessage(error: unknown): string {
   return String(error);
 }
 
+// Production (Vercel): set VITE_API_BASE_URL to the Render backend URL.
+// Local dev: empty, so requests stay relative and use the Vite proxy.
+const API_BASE: string = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
+const apiPath = (path: string): string => `${API_BASE}${path}`;
+
 let unauthorizedHandler: (() => void) | null = null;
 
 export function setUnauthorizedHandler(handler: () => void): void {
@@ -33,7 +38,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     },
   });
 
-  if (response.status === 401 && unauthorizedHandler && !path.startsWith("/api/auth/")) {
+  if (response.status === 401 && unauthorizedHandler && !path.includes("/api/auth/")) {
     unauthorizedHandler();
   }
 
@@ -62,51 +67,51 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const api = {
   signup: (data: { email: string; password: string; name: string }) =>
-    request<User>("/api/auth/signup", { method: "POST", body: JSON.stringify(data) }),
+    request<User>(apiPath("/api/auth/signup"), { method: "POST", body: JSON.stringify(data) }),
 
   login: (data: { email: string; password: string }) =>
-    request<User>("/api/auth/login", { method: "POST", body: JSON.stringify(data) }),
+    request<User>(apiPath("/api/auth/login"), { method: "POST", body: JSON.stringify(data) }),
 
-  logout: () => request<void>("/api/auth/logout", { method: "POST" }),
+  logout: () => request<void>(apiPath("/api/auth/logout"), { method: "POST" }),
 
-  me: () => request<User>("/api/auth/me"),
+  me: () => request<User>(apiPath("/api/auth/me")),
 
   authConfig: () =>
-    request<{ google_enabled: boolean; google_client_id: string | null }>("/api/auth/config"),
+    request<{ google_enabled: boolean; google_client_id: string | null }>(apiPath("/api/auth/config")),
 
   googleLogin: (id_token: string) =>
-    request<User>("/api/auth/google", { method: "POST", body: JSON.stringify({ id_token }) }),
+    request<User>(apiPath("/api/auth/google"), { method: "POST", body: JSON.stringify({ id_token }) }),
 
-  listDocuments: () => request<DocumentItem[]>("/api/documents"),
+  listDocuments: () => request<DocumentItem[]>(apiPath("/api/documents")),
 
   uploadDocument: (file: File) => {
     const form = new FormData();
     form.append("file", file);
-    return request<DocumentItem>("/api/documents", { method: "POST", body: form });
+    return request<DocumentItem>(apiPath("/api/documents"), { method: "POST", body: form });
   },
 
   deleteDocument: (id: string) =>
-    request<void>(`/api/documents/${id}`, { method: "DELETE" }),
+    request<void>(apiPath(`/api/documents/${id}`), { method: "DELETE" }),
 
   chat: (data: { message: string; conversation_id?: string | null; document_ids?: string[] }) =>
-    request<ChatResponse>("/api/chat", {
+    request<ChatResponse>(apiPath("/api/chat"), {
       method: "POST",
       body: JSON.stringify({ document_ids: [], ...data }),
     }),
 
-  listConversations: () => request<Conversation[]>("/api/conversations"),
+  listConversations: () => request<Conversation[]>(apiPath("/api/conversations")),
 
   getMessages: (id: string) =>
-    request<{ conversation_id: string; messages: Message[] }>(`/api/conversations/${id}/messages`),
+    request<{ conversation_id: string; messages: Message[] }>(apiPath(`/api/conversations/${id}/messages`)),
 
   deleteConversation: (id: string) =>
-    request<void>(`/api/conversations/${id}`, { method: "DELETE" }),
+    request<void>(apiPath(`/api/conversations/${id}`), { method: "DELETE" }),
 
   chatStream: async (
     data: { message: string; conversation_id?: string | null; document_ids?: string[] },
     onToken: (text: string) => void,
   ): Promise<{ conversation_id: string; citations: Citation[] }> => {
-    const response = await fetch("/api/chat/stream", {
+    const response = await fetch(apiPath("/api/chat/stream"), {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
