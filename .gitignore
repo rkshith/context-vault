@@ -1,0 +1,33 @@
+# Secrets / env
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+frontend/dist/
+
+# Runtime data
+data/
+backend/storage/
+*.sqlite3
+
+# Model caches
+models/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+frontend/node_modules/
+node_modules/
