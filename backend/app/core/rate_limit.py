@@ -12,6 +12,11 @@ from fastapi import HTTPException, Request, status
 _hits: dict[str, deque[float]] = defaultdict(deque)
 
 
+def _purge() -> None:
+    for key in [k for k, bucket in _hits.items() if not bucket]:
+        del _hits[key]
+
+
 def rate_limit(max_calls: int, window_seconds: int):
     async def dependency(request: Request) -> None:
         now = time.monotonic()
@@ -25,6 +30,8 @@ def rate_limit(max_calls: int, window_seconds: int):
                 detail="Too many requests, please slow down",
             )
         bucket.append(now)
+        if len(_hits) > 10000:
+            _purge()
 
     return dependency
 

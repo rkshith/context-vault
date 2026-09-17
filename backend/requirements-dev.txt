@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# testing (dev only — not installed in deploy images)
+pytest>=8.2.0
+pytest-asyncio>=0.23.0

@@ -115,7 +115,8 @@ Infra: postgres:16-alpine, qdrant/qdrant:latest, python:3.12-slim, node:22-alpin
 | 5 | React frontend (login/chat/documents) | BUILT, Vite serves :5173, proxy wired | Manual browser pass: login, upload, poll statuses, select docs, send chat, check citations; run `npm run build` in frontend container to typecheck |
 | 6 | Google OAuth (GIS ID-token, env-gated) | DONE (code) | Set `GOOGLE_CLIENT_ID`, restart backend, verify Google button on login + sign-in flow |
 | 7 | Polish: streaming, rate-limit, tests, README | DONE (code) | Run `pytest` in backend container; `npm run build` in frontend container for typecheck |
-| 8 | Final E2E verification | BLOCKED on Docker daemon | Start Docker Desktop, `docker compose up --build`, migrate, signup→upload→ready→chat with citations→delete |
+| 8 | Final E2E verification | DONE on cloud (Supabase+Qdrant Cloud+OpenRouter cited answer) + slim-build re-verified | Local pg/qdrant removed from compose; only backend+frontend containers remain |
+| 9 | Free-tier slimming | DONE | Removed: unused Depends import, llm logger, google JWKS prefetch fn; deferred fastembed import (onnxruntime out of boot/RAM); split requirements-dev.txt; .dockerignore; OMP=1 + no tokenizer parallelism; pool 3+2; rate-limiter purge. Google auth kept dormant (env-gated, zero runtime cost). |
 
 ## 10. How to Run / Verify
 

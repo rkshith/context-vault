@@ -4,13 +4,9 @@ OpenRouter exposes an OpenAI-compatible API, so the official openai client
 is pointed at the OpenRouter base URL with our API key.
 """
 
-import logging
-
 from openai import AsyncOpenAI
 
 from app.core.config import get_settings
-
-logger = logging.getLogger(__name__)
 
 settings = get_settings()
 

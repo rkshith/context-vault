@@ -8,18 +8,20 @@ replacing the two private functions.
 
 import asyncio
 
-from fastembed import TextEmbedding
-
 from app.core.config import get_settings
 
 settings = get_settings()
 
-_model: TextEmbedding | None = None
+_model = None
 
 
-def _get_model() -> TextEmbedding:
+def _get_model():
+    # Imported lazily: fastembed pulls onnxruntime (~100MB+ RAM) and is only
+    # needed on first embed, not at boot. Matters on small Render instances.
     global _model
     if _model is None:
+        from fastembed import TextEmbedding
+
         _model = TextEmbedding(
             model_name=settings.embedding_model,
             cache_dir=settings.fastembed_cache_dir,

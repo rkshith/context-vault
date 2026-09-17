@@ -8,7 +8,6 @@ No Google client secret needed; disabled when GOOGLE_CLIENT_ID is empty.
 
 import time
 
-import httpx
 import jwt
 from jwt import PyJWKClient
 
@@ -53,14 +52,3 @@ def verify_google_id_token(id_token: str) -> dict:
         raise GoogleAuthError("Google email is not verified")
     claims["_verified_at"] = time.time()
     return claims
-
-
-async def warm_jwks_cache() -> None:
-    """Optional startup prefetch so first Google login isn't slow."""
-    if not settings.google_client_id:
-        return
-    try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            await client.get(_GOOGLE_CERTS_URL)
-    except httpx.HTTPError:
-        pass

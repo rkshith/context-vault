@@ -32,7 +32,10 @@ See `.env.example`. Key vars: `JWT_SECRET` (generate with `python -c "import sec
 ## Tests
 
 ```powershell
-docker compose exec -T backend pytest
+cd backend
+python -m venv .venv; .\.venv\Scripts\Activate.ps1
+pip install -r requirements-dev.txt
+pytest
 ```
 
 Unit tests cover chunking, parsers, password/JWT helpers, and the Qdrant tenant filter. `backend/scripts/test_ingestion.py` is an end-to-end ingestion check run inside the backend container.

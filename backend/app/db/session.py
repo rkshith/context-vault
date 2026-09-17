@@ -7,7 +7,12 @@ from app.core.config import get_settings
 settings = get_settings()
 
 engine = create_async_engine(
-    settings.database_url, pool_pre_ping=True, connect_args=settings.db_connect_args
+    settings.database_url,
+    pool_pre_ping=True,
+    connect_args=settings.db_connect_args,
+    # Small pool: single backend behind a transaction pooler on free tiers.
+    pool_size=3,
+    max_overflow=2,
 )
 
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
