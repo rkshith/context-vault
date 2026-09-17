@@ -1,5 +1,11 @@
 import asyncio
+import sys
 from logging.config import fileConfig
+from pathlib import Path
+
+# Anchor imports to this file's location: backend/alembic/env.py -> backend/.
+# Works regardless of the process working directory (local Docker, Render, CI).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from alembic import context
 from sqlalchemy import pool
